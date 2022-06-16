@@ -13,6 +13,8 @@ public class Client2 {
     private DataOutputStream out;
     private Socket socket;
     private Thread thread;
+    private static boolean FLAG_AUTH = false;
+    private AuthService authService;
 
     public static void main(String[] args) {
         Client2 client = new Client2();
@@ -21,40 +23,28 @@ public class Client2 {
 
     private void startClient() {
         try {
-            openConnect();
-
-            outMessage();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void openConnect() {
-        try {
             socket = new Socket(HOST, PORT);
             System.out.println("Client2 started");
 
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            inMessage();
+            thread = new Thread(() -> {
+                try {
+                    while (true) {
+                        String inMessFromServer = in.readUTF();
+                        System.out.println(inMessFromServer);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            thread.start();
+
+            outMessage();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void inMessage() {
-        thread = new Thread(() -> {
-            try {
-                while (true) {
-                    String inMessFromServer = in.readUTF();
-                    System.out.println("Message from server: " + inMessFromServer);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        thread.start();
     }
 
     private void outMessage() throws IOException {
@@ -62,33 +52,9 @@ public class Client2 {
             while (true) {
                 if (sc.hasNext()) {
                     String outMessToServer = sc.nextLine();
-                    if ("/end".equalsIgnoreCase(outMessToServer)) {
-                        System.out.println("Client2 stopped");
-                        break;
-                    }
-                    out.writeUTF("Client1 = " + "\"" + outMessToServer + "\"");
+                    out.writeUTF(outMessToServer);
                 }
             }
-        } finally {
-            closeClient();
-        }
-    }
-
-    private void closeClient() throws IOException {
-        if (thread.isInterrupted() && thread.isAlive()) {
-            thread.interrupt();
-        }
-
-        if (out != null) {
-            out.close();
-        }
-
-        if (in != null) {
-            in.close();
-        }
-
-        if (socket != null) {
-            socket.close();
         }
     }
 }
