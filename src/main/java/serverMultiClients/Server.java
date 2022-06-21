@@ -8,40 +8,55 @@ import java.util.List;
 
 public class Server {
     private static final int PORT = 8189;
-    private final List<ClientHandler> clientHandlers;
+    private final List<ClientHandler> clients;
+    private AuthService authService;
 
     public Server() {
-        this.clientHandlers = new ArrayList<>();
+        this.clients = new ArrayList<>();
     }
 
     public void startServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server started");
+            authService = new MyAuthService();
+            authService.start();
             System.out.println("Waiting connected...");
 
-            waitConnectNewClient(serverSocket);
-
-        } catch (IOException e) {
-            throw new RuntimeException("Error start server", e);
-        }
-    }
-
-    private void waitConnectNewClient(ServerSocket serverSocket) {
-        try {
             while (true) {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected");
-                ClientHandler clientHandler = new ClientHandler(socket, this);
-                clientHandlers.add(clientHandler);
+
+                new ClientHandler(socket, this, authService);
             }
+
         } catch (IOException e) {
-            throw new RuntimeException("Error connect new client", e);
+            throw new RuntimeException("Error start server", e);
+        } finally {
+            if (authService != null) {
+                authService.stop();
+            }
         }
     }
 
-    public void broadcast(String inMsg) {
-        for (ClientHandler clientHandler : clientHandlers) {
-            clientHandler.writeMessage(inMsg);
+    public synchronized void broadcast(String mess) {
+        for (ClientHandler clientHandler : clients) {
+            clientHandler.sendMessage(mess);
         }
+    }
+
+    public synchronized void broadcastByName(String mess, String name) {
+        for (ClientHandler clientHandler : clients) {
+            if (clientHandler.getName().equals(name)) {
+                clientHandler.sendMessage(mess);
+            }
+        }
+    }
+
+    public synchronized void subscribe(ClientHandler client) {
+        clients.add(client);
+    }
+
+    public synchronized void unsubscribe(ClientHandler clientHandler) {
+        clients.remove(clientHandler);
     }
 }
