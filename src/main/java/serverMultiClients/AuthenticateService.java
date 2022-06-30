@@ -1,6 +1,6 @@
 package serverMultiClients;
 
-public interface AuthService {
+public interface AuthenticateService {
     void start();
 
     void stop();

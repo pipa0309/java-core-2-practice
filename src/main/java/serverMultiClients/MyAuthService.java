@@ -3,8 +3,9 @@ package serverMultiClients;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MyAuthService implements AuthService {
+public class MyAuthService implements AuthenticateService {
     private final List<User> users;
+    private boolean flagAuth;
 
     public MyAuthService() {
         this.users = new ArrayList<>();
