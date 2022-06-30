@@ -35,7 +35,6 @@ public class MyAuthService implements AuthenticateService {
         return null;
     }
 
-    //class User
     private static class User {
         private final String login;
         private final String pass;

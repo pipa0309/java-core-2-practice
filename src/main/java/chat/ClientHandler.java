@@ -67,7 +67,7 @@ public class ClientHandler {
     private boolean authorize() throws EOFException {
         try {
             while (thread.isAlive() && !socket.isClosed()) {
-                String inputMessage = in.readUTF(); // 2. хендлер принял сообщение от клиента
+                String inputMessage = in.readUTF();
 
                 if (inputMessage.startsWith("/auth")) {
                     String[] tokens = inputMessage.split("\\s+");
@@ -99,7 +99,7 @@ public class ClientHandler {
     public void readMessage() throws EOFException {
         try {
             while (thread.isAlive() && !socket.isClosed()) {
-                String inputStr = in.readUTF(); // 2.1 хендлер принял сообщение от клиента
+                String inputStr = in.readUTF();
                 if ("/end".equalsIgnoreCase(inputStr)) {
                     server.broadcastByName("/end", this.name);
                     server.unsubscribe(name);
@@ -133,7 +133,7 @@ public class ClientHandler {
 
     public void sendMessage(String message) {
         try {
-            out.writeUTF(message); // 3. хендлер отправил сообщение клиенту
+            out.writeUTF(message);
         } catch (IOException e) {
             e.printStackTrace();
         }

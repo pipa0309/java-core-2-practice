@@ -43,7 +43,7 @@ public class Client3 {
                     while (true) {
                         System.out.println("log: read-in");
                         System.out.println("ENTER MESSAGE >>> ");
-                        String inMessFromServer = in.readUTF();// 4. клиент принял сообщение от хендлера
+                        String inMessFromServer = in.readUTF();
 
                         if (ifEndIn(inMessFromServer)) break;
 
@@ -80,7 +80,7 @@ public class Client3 {
                 if (sc.hasNext()) {
                     String outMessToServer = sc.nextLine();
                     if (!socket.isClosed()) {
-                        out.writeUTF(outMessToServer); // 1. клиент выслал сообщение хендлеру
+                        out.writeUTF(outMessToServer);
                         System.out.println("ENTER MESSAGE >>> ");
                         if (ifEndOut(outMessToServer)) {
                             closeClient();

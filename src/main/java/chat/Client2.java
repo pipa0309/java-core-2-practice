@@ -43,7 +43,7 @@ public class Client2 {
                     while (true) {
                         System.out.println("log: read-in");
                         System.out.println("ENTER MESSAGE >>> ");
-                        String inMessFromServer = in.readUTF();// 4. клиент принял сообщение от хендлера
+                        String inMessFromServer = in.readUTF();
 
                         if (ifEndIn(inMessFromServer)) break;
 
