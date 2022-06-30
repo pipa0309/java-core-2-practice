@@ -1,4 +1,4 @@
-package serverMultiClients;
+package chat;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -19,7 +19,7 @@ public class ClientHandler {
     private TimerAuth timerAuth;
     private Thread thread;
     public boolean authOk;
-    private static final int LIMIT_SECONDS = 30;
+    private static final int LIMIT_SECONDS = 10;
 
     public String getName() {
         return name;
@@ -67,16 +67,17 @@ public class ClientHandler {
     private boolean authorize() throws EOFException {
         try {
             while (thread.isAlive() && !socket.isClosed()) {
-                String inputMessage = in.readUTF(); // 2. хендлер принял сообщение от клиента
+                String inputMessage = in.readUTF();
 
                 if (inputMessage.startsWith("/auth")) {
                     String[] tokens = inputMessage.split("\\s+");
                     String nick = authService.getNickByLoginAndPass(tokens[1], tokens[2]);
 
-                    if (nick != null) {
-                        server.subscribe(this);
-                        sendMessage("/authOk " + nick);
+
+                    if (nick != null && !server.isContainsClient(nick)) {
                         this.name = nick;
+                        server.subscribe(name, this);
+                        sendMessage("/authOk " + nick);
                         server.broadcast(name + " CONNECTED TO CHAT");
                         authService.stop();
                         return true;
@@ -98,10 +99,10 @@ public class ClientHandler {
     public void readMessage() throws EOFException {
         try {
             while (thread.isAlive() && !socket.isClosed()) {
-                String inputStr = in.readUTF(); // 2.1 хендлер принял сообщение от клиента
+                String inputStr = in.readUTF();
                 if ("/end".equalsIgnoreCase(inputStr)) {
                     server.broadcastByName("/end", this.name);
-                    server.unsubscribe(this);
+                    server.unsubscribe(name);
                     String messageFromLeftChat = this.name + " LEFT CHAT";
                     server.broadcast(messageFromLeftChat);
                     throw new RuntimeException(messageFromLeftChat);
@@ -132,14 +133,14 @@ public class ClientHandler {
 
     public void sendMessage(String message) {
         try {
-            out.writeUTF(message); // 3. хендлер отправил сообщение клиенту
+            out.writeUTF(message);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void closeConnection() {
-        server.unsubscribe(this);
+        server.unsubscribe(name);
 
         try {
             if (in != null) {
