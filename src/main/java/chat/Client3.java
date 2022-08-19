@@ -1,10 +1,12 @@
-package serverMultiClients;
+package chat;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client1 {
+public class Client3 {
     private static final int PORT = 8189;
     private static final String HOST = "127.0.0.1";
     private DataInputStream in;
@@ -13,7 +15,7 @@ public class Client1 {
     private Thread threadIn;
 
     public static void main(String[] args) {
-        Client1 client = new Client1();
+        Client3 client = new Client3();
 
         client.waitConnection();
 
@@ -25,7 +27,7 @@ public class Client1 {
     private void waitConnection() {
         try {
             socket = new Socket(HOST, PORT);
-            System.out.println("CLIENT1 STARTED\n");
+            System.out.println("CLIENT3 STARTED\n");
 
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
@@ -41,7 +43,7 @@ public class Client1 {
                     while (true) {
                         System.out.println("log: read-in");
                         System.out.println("ENTER MESSAGE >>> ");
-                        String inMessFromServer = in.readUTF();// 4. клиент принял сообщение от хендлера
+                        String inMessFromServer = in.readUTF();
 
                         if (ifEndIn(inMessFromServer)) break;
 
@@ -70,28 +72,28 @@ public class Client1 {
     }
 
     private void outMessage() {
-            try (Scanner sc = new Scanner(System.in)) {
+        try (Scanner sc = new Scanner(System.in)) {
 
-                System.out.println("ENTER '/auth login password' >>> ");
-                while (true) {
-                    System.out.println("log: write-out");
-                    if (sc.hasNext()) {
-                        String outMessToServer = sc.nextLine();
-                        if (!socket.isClosed()) {
-                            out.writeUTF(outMessToServer); // 1. клиент выслал сообщение хендлеру
-                            System.out.println("ENTER MESSAGE >>> ");
-                            if (ifEndOut(outMessToServer)) {
-                                closeClient();
-                                break;
-                            }
-                        } else {
+            System.out.println("ENTER '/auth login password' >>> ");
+            while (true) {
+                System.out.println("log: write-out");
+                if (sc.hasNext()) {
+                    String outMessToServer = sc.nextLine();
+                    if (!socket.isClosed()) {
+                        out.writeUTF(outMessToServer);
+                        System.out.println("ENTER MESSAGE >>> ");
+                        if (ifEndOut(outMessToServer)) {
+                            closeClient();
                             break;
                         }
+                    } else {
+                        break;
                     }
                 }
-            } catch (IOException ioException) {
-                ioException.printStackTrace();
             }
+        } catch (IOException ioException) {
+            ioException.printStackTrace();
+        }
     }
 
     private boolean ifEndOut(String outMessToServer) throws IOException {

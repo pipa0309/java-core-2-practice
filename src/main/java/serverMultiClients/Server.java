@@ -3,29 +3,29 @@ package serverMultiClients;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Server {
     private static final int PORT = 8189;
-    private final List<ClientHandler> clients;
-    private AuthService authService;
+    private final Set<ClientHandler> clients;
+    private AuthenticateService authService;
 
     public Server() {
-        this.clients = new ArrayList<>();
+        this.clients = new HashSet<>();
     }
 
     public void startServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server started");
             authService = new MyAuthService();
-            authService.start();
             System.out.println("Waiting connected...");
 
-            while (true) {
+            while (!serverSocket.isClosed()) {
                 Socket socket = serverSocket.accept();
                 System.out.println("New client connected");
 
+                authService.start();
                 new ClientHandler(socket, this, authService);
             }
 
@@ -59,4 +59,8 @@ public class Server {
     public synchronized void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
     }
+
+//    private boolean checkSubscribe(Set<ClientHandler> clients) {
+//        if (clients.)
+//    }
 }
